@@ -1,0 +1,2 @@
+CREATE DATABASE store_db;
+CREATE DATABASE route_db;
