@@ -1,2 +1,3 @@
 CREATE DATABASE store_db;
 CREATE DATABASE route_db;
+CREATE DATABASE cargo_db;

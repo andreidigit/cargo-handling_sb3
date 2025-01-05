@@ -16,5 +16,7 @@ public interface CargoService {
     @GetMapping(value = "/cargo/{cargoId}", produces = "application/json")
     Mono<Cargo> getCargo(@PathVariable int cargoId);
     Mono<Cargo> createCargo(@RequestBody Cargo body);
+    Mono<Cargo> updateCargo(@RequestBody Cargo body);
     Mono<Void> deleteCargo(@PathVariable int cargoId);
+
 }

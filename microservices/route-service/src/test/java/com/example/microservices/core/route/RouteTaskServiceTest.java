@@ -2,7 +2,6 @@ package com.example.microservices.core.route;
 
 import com.example.microservices.core.route.broker.ConsumersConfig;
 import com.example.microservices.core.route.persistence.RouteRepository;
-import com.example.microservices.core.route.services.RouteMapper;
 import com.example.microservices.core.route.util.ContainersTestBase;
 import com.example.microservices.core.route.util.ReaderProducedMessages;
 import com.example.microservices.core.route.util.RouteEntityHelper;
@@ -49,7 +48,7 @@ class RouteTaskServiceTest extends ContainersTestBase {
     public RouteTaskServiceTest(
             @Value("${channelsOut.find.topic}") String topicName,
             OutputDestination target,
-            RouteMapper mapper, ObjectMapper objectMapper
+            ObjectMapper objectMapper
     ) {
         this.objectMapper = objectMapper;
         this.readerRouteFound = new ReaderProducedMessages(target, topicName);

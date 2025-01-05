@@ -1,0 +1,29 @@
+api:
+  common:
+    version:
+    title:
+    description:
+    termsOfService:
+    license:
+    licenseUrl:
+    externalDocDesc:
+    externalDocUrl:
+    contact:
+      name:
+      url:
+      email:
+
+spring.cloud.stream:
+  defaultBinder: kafka
+  default.contentType: application/json
+  bindings:
+    store-crud-out-0:
+      destination: store-crud
+    route-crud-out-0:
+      destination: route-crud
+    cargo-crud-out-0:
+      destination: cargo-crud
+    order-crud-out-0:
+      destination: order-crud
+
+

@@ -9,7 +9,6 @@ import com.example.mutual.util.http.HttpErrorInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
@@ -38,17 +37,15 @@ public class StoreDirectIntegration implements StoreService {
     private final WebClient webClient;
     private final Scheduler publishEventScheduler;
     private final StreamBridge streamBridge;
-    private final String bindingName;
+    private final String bindingName="store-crud";
 
     @Autowired
     public StoreDirectIntegration(
-            @Value("${channelsOut.store.bind}") String bindingName,
             ObjectMapper mapper,
             WebClient webClient,
             Scheduler publishEventScheduler,
             StreamBridge streamBridge
     ) {
-        this.bindingName = bindingName;
         this.mapper = mapper;
         this.webClient = webClient;
         this.publishEventScheduler = publishEventScheduler;

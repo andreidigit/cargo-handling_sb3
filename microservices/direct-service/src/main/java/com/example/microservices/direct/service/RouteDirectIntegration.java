@@ -9,7 +9,6 @@ import com.example.mutual.util.http.HttpErrorInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
@@ -38,22 +37,21 @@ public class RouteDirectIntegration implements RouteService {
     private final WebClient webClient;
     private final Scheduler publishEventScheduler;
     private final StreamBridge streamBridge;
-    private final String bindingName;
+    private final String bindingName = "route-crud";
 
     @Autowired
     public RouteDirectIntegration(
-            @Value("${channelsOut.route.bind}") String bindingName,
             ObjectMapper mapper,
             WebClient webClient,
             Scheduler publishEventScheduler,
             StreamBridge streamBridge
     ) {
-        this.bindingName = bindingName;
         this.mapper = mapper;
         this.webClient = webClient;
         this.publishEventScheduler = publishEventScheduler;
         this.streamBridge = streamBridge;
     }
+
     @Override
     public Mono<Route> getRoute(int routeId) {
         URI url = UriComponentsBuilder
@@ -89,6 +87,7 @@ public class RouteDirectIntegration implements RouteService {
                 return ex;
         }
     }
+
     private String getErrorMessage(WebClientResponseException ex) {
         try {
             return mapper.readValue(ex.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();

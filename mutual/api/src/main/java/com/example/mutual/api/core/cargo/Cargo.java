@@ -1,16 +1,15 @@
 package com.example.mutual.api.core.cargo;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class Cargo {
-    private final int cargoId;
-    private final String name;
-    private final int weight;
+    private int cargoId = 0;
+    private String name = null;
+    private int weight = 0;
     private Status status = Status.STOCK;
     private String serviceAddress = null;
 

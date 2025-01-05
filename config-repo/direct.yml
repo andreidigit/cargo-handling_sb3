@@ -1,0 +1,31 @@
+spring.application.name: direct
+server.port: 7000
+server.forward-headers-strategy: framework
+
+spring.cloud.stream:
+  bindings:
+    store-crud-out-0:
+      destination: store-crud
+    route-crud-out-0:
+      destination: route-crud
+    cargo-crud-out-0:
+      destination: cargo-crud
+    order-crud-out-0:
+      destination: order-crud
+
+spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}
+
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
+
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
+
+---
+spring.config.activate.on-profile: docker
+
+server.port: 80
+spring.cloud.stream.kafka.binder.brokers: kafka
+

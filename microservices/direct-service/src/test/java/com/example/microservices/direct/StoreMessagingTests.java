@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -29,20 +28,22 @@ import static reactor.core.publisher.Mono.just;
 @Slf4j
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
-        properties = {"spring.main.allow-bean-definition-overriding=true"})
+        classes = {TestSecurityConfig.class},
+        properties = {
+                "spring.security.oauth2.resourceserver.jwt.issuer-uri=",
+                "spring.main.allow-bean-definition-overriding=true"
+        })
 @Import({TestChannelBinderConfiguration.class})
 class StoreMessagingTests {
 
     @Autowired
     private WebTestClient client;
     private final ReaderProducedMessages readerStoreChanges;
+    private final String appApi = "/api/v1";
 
     @Autowired
-    public StoreMessagingTests(
-            @Value("${channelsOut.store.topic}") String topicName,
-            OutputDestination target
-    ) {
-        this.readerStoreChanges = new ReaderProducedMessages(target, topicName);
+    public StoreMessagingTests(OutputDestination target) {
+        this.readerStoreChanges = new ReaderProducedMessages(target, "store-crud");
     }
 
     @BeforeEach
@@ -103,7 +104,7 @@ class StoreMessagingTests {
 
     private void postAndVerifyStore(Store store, HttpStatus expectedStatus) {
         client.post()
-                .uri("/store")
+                .uri(appApi + "/stores/store")
                 .body(just(store), Store.class)
                 .exchange()
                 .expectStatus().isEqualTo(expectedStatus);
@@ -111,7 +112,7 @@ class StoreMessagingTests {
 
     private void postUpdateAndVerifyStore(Store store, HttpStatus expectedStatus) {
         client.post()
-                .uri("/store/update")
+                .uri(appApi + "/stores/store/update")
                 .body(just(store), Store.class)
                 .exchange()
                 .expectStatus().isEqualTo(expectedStatus);
@@ -119,7 +120,7 @@ class StoreMessagingTests {
 
     private void deleteAndVerifyStore(int storeId, HttpStatus expectedStatus) {
         client.delete()
-                .uri("/store/" + storeId)
+                .uri(appApi + "/stores/store/" + storeId)
                 .exchange()
                 .expectStatus().isEqualTo(expectedStatus);
     }

@@ -1,0 +1,57 @@
+server.port: 7003
+spring.application.name: cargo
+server.error.include-message: always
+
+spring.jackson.deserialization.adjust-dates-to-context-time-zone: true
+
+# Strongly recommend to set this property to "none" in a production environment!
+spring.jpa.hibernate.ddl-auto: update
+
+spring.datasource:
+  url: jdbc:postgresql://localhost/cargo_db
+  username: postgres
+  password: admin
+
+spring.datasource.hikari.initializationFailTimeout: 60000
+
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+spring.cloud.function.definition: consumerCrud
+
+spring.cloud.stream:
+  defaultBinder: kafka
+  default.contentType: application/json
+  bindings:
+    consumerCrud-in-0:
+      destination: cargo-crud
+      group: cargoCrudGroup
+      consumer:
+        maxAttempts: 1
+    cargo-revise-out-0:
+      destination: cargo-revise
+
+spring.cloud.stream.kafka.bindings:
+  consumerCrud-in-0:
+    consumer:
+      enableDlq: true
+
+spring.cloud.stream.kafka.binder:
+  brokers: 127.0.0.1
+  defaultBrokerPort: 9092
+  replication-factor: 1
+
+
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
+
+---
+spring.config.activate.on-profile: docker
+
+server.port: 80
+spring.cloud.stream.kafka.binder.brokers: kafka
+spring.kafka.bootstrap-servers: kafka:9092

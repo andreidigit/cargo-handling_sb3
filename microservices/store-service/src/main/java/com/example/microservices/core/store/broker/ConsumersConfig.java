@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.DltHandler;
 
 import java.util.function.Consumer;
 
@@ -56,10 +55,5 @@ public class ConsumersConfig {
 
             log.info("Message processing done!");
         };
-    }
-
-    @DltHandler
-    public void listenDLT(Event<Integer, Store> event) {
-        log.error(" !-----!  DLT with event {}", event.getEventType());
     }
 }

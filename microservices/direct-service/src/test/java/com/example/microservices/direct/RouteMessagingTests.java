@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -29,20 +28,22 @@ import static reactor.core.publisher.Mono.just;
 @Slf4j
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
-        properties = {"spring.main.allow-bean-definition-overriding=true"})
+        classes = {TestSecurityConfig.class},
+        properties = {
+                "spring.security.oauth2.resourceserver.jwt.issuer-uri=",
+                "spring.main.allow-bean-definition-overriding=true"
+        })
 @Import({TestChannelBinderConfiguration.class})
 class RouteMessagingTests {
 
     @Autowired
     private WebTestClient client;
     private final ReaderProducedMessages readerRouteChanges;
+    private final String appApi = "/api/v1";
 
     @Autowired
-    public RouteMessagingTests(
-            @Value("${channelsOut.route.topic}") String topicName,
-            OutputDestination target
-    ) {
-        this.readerRouteChanges = new ReaderProducedMessages(target, topicName);
+    public RouteMessagingTests(OutputDestination target) {
+        this.readerRouteChanges = new ReaderProducedMessages(target, "route-crud");
     }
 
     @BeforeEach
@@ -53,7 +54,7 @@ class RouteMessagingTests {
 
     @Test
     void createRoute() {
-       Route route = new Route(1, 20, 30, "form to there", 210, 20);
+        Route route = new Route(1, 20, 30, "from to there", 210, 20);
         postAndVerifyRoute(route, ACCEPTED);
         final List<String> routeMessages = readerRouteChanges.getMessages();
 
@@ -117,7 +118,7 @@ class RouteMessagingTests {
 
     private void postAndVerifyRoute(Route route, HttpStatus expectedStatus) {
         client.post()
-                .uri("/route")
+                .uri(appApi + "/routes/route")
                 .body(just(route), Route.class)
                 .exchange()
                 .expectStatus().isEqualTo(expectedStatus);
@@ -125,7 +126,7 @@ class RouteMessagingTests {
 
     private void postUpdateAndVerifyRoute(Route route, HttpStatus expectedStatus) {
         client.post()
-                .uri("/route/update")
+                .uri(appApi + "/routes/route/update")
                 .body(just(route), Route.class)
                 .exchange()
                 .expectStatus().isEqualTo(expectedStatus);
@@ -133,7 +134,7 @@ class RouteMessagingTests {
 
     private void deleteAndVerifyRoute(int routeId, HttpStatus expectedStatus) {
         client.delete()
-                .uri("/route/" + routeId)
+                .uri(appApi + "/routes/route/" + routeId)
                 .exchange()
                 .expectStatus().isEqualTo(expectedStatus);
     }

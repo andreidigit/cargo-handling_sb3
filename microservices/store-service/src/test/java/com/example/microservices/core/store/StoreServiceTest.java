@@ -94,7 +94,7 @@ class StoreServiceTest extends ContainersTestBase {
     }
 
     @Test
-    void getProductInvalidId() {
+    void getStoreInvalidId() {
         int storeIdInvalid = -1;
         getAndVerifyStore(storeIdInvalid, UNPROCESSABLE_ENTITY)
                 .jsonPath("$.path").isEqualTo("/store/" + storeIdInvalid)
@@ -102,7 +102,7 @@ class StoreServiceTest extends ContainersTestBase {
     }
 
     @Test
-    void getProductInvalidParameter() {
+    void getStoreInvalidParameter() {
         getAndVerifyStore("/string", BAD_REQUEST)
                 .jsonPath("$.path").isEqualTo("/store/string")
                 .jsonPath("$.message").isEqualTo("Type mismatch.");

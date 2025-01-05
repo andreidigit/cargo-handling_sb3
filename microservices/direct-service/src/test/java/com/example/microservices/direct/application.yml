@@ -1,0 +1,135 @@
+springdoc:
+  swagger-ui.path: /openapi/swagger-ui.html
+  api-docs.path: /openapi/v3/api-docs
+  packagesToScan: com.example.microservices.direct
+  pathsToMatch: /**
+  cache.disabled: true
+
+  swagger-ui:
+    oauth2-redirect-url: /swagger-ui/oauth2-redirect.html
+    oauth:
+      clientId: writer
+      useBasicAuthenticationWithAccessCodeGrant: true
+  oAuthFlow:
+    authorizationUrl: https://localhost:8443/oauth2/authorize
+    tokenUrl: https://localhost:8443/oauth2/token
+
+api:
+  common:
+    version: 1.0.0
+    title: Cargo Handling API
+    description: Description of the API...
+    termsOfService: MY TERMS OF SERVICE
+    license: MY LICENSE
+    licenseUrl: MY LICENSE URL
+
+    externalDocDesc: MY WIKI PAGE
+    externalDocUrl: MY WIKI URL
+    contact:
+      name: NAME OF CONTACT
+      url: URL TO CONTACT
+      email: contact@mail.com
+
+  responseCodes:
+    ok.description: OK
+    badRequest.description: Bad Request, invalid format of the request. See response message for more information
+    notFound.description: Not found, the specified id does not exist
+    unprocessableEntity.description: Unprocessable entity, input parameters caused the processing to fail. See response message for more information
+
+  store:
+
+    get-store:
+      description: Returns a model of the specified store id
+      notes: |
+        # Normal response
+        If the requested store id is found the method will return information regarding:
+        1. Base store information
+        1. Service Addresses\n(technical information regarding the addresses of the microservices that created the response)
+
+        # Expected error responses
+        In the following cases, error response be created (used to simplify testing of error conditions)
+
+        ## Non numerical store id
+        400 - A **Bad Request** error will be returned
+
+        ## Product id 13
+        404 - A **Not Found** error will be returned
+
+        ## Negative store ids
+        422 - An **Unprocessable Entity** error will be returned
+
+    create-store:
+      description: Creates a store
+      notes: |
+        # Normal response
+        Am entity of the store information posted to the API will be created.
+
+        # Expected error responses
+        1. If a store with the same storeId as specified in the posted information already exists,
+           an **422 - Unprocessable Entity** error with a "duplicate key" error message will be returned
+
+    update-store:
+      description: Update the store
+      notes: |
+        # Normal response
+        Am entity of the store information posted to the API will be updated.
+
+        # Expected error responses
+        1. If the store is not provide the changes based on the rules,
+        an **422 - Unprocessable Entity** error with a "There is a broken Update Rule" error message will be returned
+
+      delete-store:
+        description: Deletes a store
+        notes: |
+          # Normal response
+          Entities for store information will be deleted.
+
+          # Expected error responses
+          1. If the store contains cargo that not provide deleting based on the rules,
+          an **422 - Unprocessable Entity** error with a "There is a broken Delete Rule" error message will be returned
+####
+spring.application.name: direct-service
+server.port: 7000
+server.forward-headers-strategy: framework
+
+spring.cloud.stream:
+  defaultBinder: kafka
+  default.contentType: application/json
+  bindings:
+    store-crud-out-0:
+      destination: store-crud
+    route-crud-out-0:
+      destination: route-crud
+    cargo-crud-out-0:
+      destination: cargo-crud
+    order-crud-out-0:
+      destination: order-crud
+
+spring.cloud.stream.kafka.binder:
+  brokers: 127.0.0.1
+  defaultBrokerPort: 9092
+
+spring.kafka.bootstrap-servers: kafka:9092
+spring.cloud.stream.kafka.binder.replication-factor: 1
+
+app:
+  auth-server: localhost
+
+spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}
+
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
+
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
+
+---
+spring.config.activate.on-profile: docker
+
+server.port: 80
+spring.cloud.stream.kafka.binder.brokers: kafka
+app:
+  auth-server: auth-server
+
