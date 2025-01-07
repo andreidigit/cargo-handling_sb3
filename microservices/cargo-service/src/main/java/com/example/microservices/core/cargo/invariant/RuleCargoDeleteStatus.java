@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @NoArgsConstructor
-public class RuleCargoDeleteUsedCapacity implements RuleCargoDelete {
+public class RuleCargoDeleteStatus implements RuleCargoDelete {
 
     @Override
     public boolean check(CargoEntity cargoEntity) {

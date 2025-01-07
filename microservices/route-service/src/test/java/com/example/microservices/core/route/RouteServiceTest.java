@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
@@ -52,12 +51,8 @@ class RouteServiceTest extends ContainersTestBase {
     private final RouteMapper mapper;
 
     @Autowired
-    public RouteServiceTest(
-            @Value("${channelsOut.revise.topic}") String topicName,
-            OutputDestination target,
-            RouteMapper mapper
-    ) {
-        this.readerRouteChanges = new ReaderProducedMessages(target, topicName);
+    public RouteServiceTest(OutputDestination target, RouteMapper mapper) {
+        this.readerRouteChanges = new ReaderProducedMessages(target, "route-revise");
         this.mapper = mapper;
     }
 

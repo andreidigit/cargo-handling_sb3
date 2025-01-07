@@ -1,12 +1,10 @@
 package com.example.mutual.api.core.store;
 
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
 
-@Component
 public interface StoreService {
         /**
      * Sample usage: "curl $HOST:$PORT/store/1".

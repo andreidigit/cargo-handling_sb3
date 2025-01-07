@@ -4,7 +4,6 @@ import com.example.microservices.core.route.broker.ProducerRevise;
 import com.example.microservices.core.route.broker.ProducerTask;
 import com.example.microservices.core.route.invariant.RuleRouteSelect;
 import com.example.microservices.core.route.persistence.RouteEntity;
-import com.example.microservices.core.route.persistence.RouteRepository;
 import com.example.mutual.api.core.route.Route;
 import com.example.mutual.api.core.route.RouteService;
 import com.example.mutual.api.core.route.RouteTaskPayload;
@@ -44,7 +43,6 @@ public class RouteServiceImpl implements RouteService, RouteTaskService {
 
     @Autowired
     public RouteServiceImpl(
-            RouteRepository repository,
             RouteMapper mapper,
             ServiceUtil serviceUtil,
             @Qualifier("jdbcScheduler") Scheduler jdbcScheduler,

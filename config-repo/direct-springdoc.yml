@@ -175,3 +175,47 @@ api:
       notes: |
         # Normal response
         Entities for cargo information will be deleted.
+
+  order:
+
+    get-order:
+      description: Returns a model of the specified order id
+      notes: |
+        # Normal response
+        If the requested order id is found the method will return information regarding:
+        1. Base order information
+        1. Service Addresses\n(technical information regarding the addresses of the microservices that created the response)
+
+        # Expected error responses
+        In the following cases, error response be created (used to simplify testing of error conditions)
+
+        ## Non numerical order id
+        400 - A **Bad Request** error will be returned
+
+        ## Route id 13
+        404 - A **Not Found** error will be returned
+
+        ## Negative order ids
+        422 - An **Unprocessable Entity** error will be returned
+
+    create-order:
+      description: Creates a order
+      notes: |
+        # Normal response
+        Am entity of the order information posted to the API will be created.
+
+        # Expected error responses
+        1. If a order with the same orderId as specified in the posted information already exists,
+           an **422 - Unprocessable Entity** error with a "duplicate key" error message will be returned
+
+    update-order:
+      description: Update the order
+      notes: |
+        # Normal response
+        Am entity of the order information posted to the API will be updated.
+
+    delete-order:
+      description: Deletes a order
+      notes: |
+        # Normal response
+        Entities for order information will be deleted.

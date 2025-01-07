@@ -1,0 +1,15 @@
+spring.jpa.hibernate.ddl-auto: update
+server.error.include-message: always
+spring.cloud.function.definition: consumerCrud
+
+spring.cloud.stream:
+  defaultBinder: kafka
+  default.contentType: application/json
+  bindings:
+    consumerCrud-in-0:
+      destination: store-crud
+      group: storeCrudGroup
+      consumer:
+        maxAttempts: 1
+    store-revise-out-0:
+      destination: store-revise

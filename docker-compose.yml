@@ -27,12 +27,12 @@ services:
           memory: 512M
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-#      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/store.yml
+      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/store.yml
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/${STORE_DB_NAME}
-#    volumes:
-#      - $PWD/config-repo:/config-repo
+    volumes:
+      - $PWD/config-repo:/config-repo
     depends_on:
       postgresql:
         condition: service_healthy
@@ -48,12 +48,12 @@ services:
           memory: 512M
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-#      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/route.yml
+      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/route.yml
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/${ROUTE_DB_NAME}
-#    volumes:
-#      - $PWD/config-repo:/config-repo
+    volumes:
+      - $PWD/config-repo:/config-repo
     depends_on:
       postgresql:
         condition: service_healthy
@@ -77,6 +77,30 @@ services:
       - $PWD/config-repo:/config-repo
     depends_on:
       postgresql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  order:
+    build: microservices/order-service
+    image: example/order
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_LOCATION=file:/config-repo/application.yml,file:/config-repo/order.yml
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/${ORDER_DB_NAME}
+    volumes:
+      - $PWD/config-repo:/config-repo
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       kafka:
         condition: service_started
@@ -138,6 +162,12 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   gateway:
     build: spring-cloud/gateway

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -51,12 +50,8 @@ class StoreServiceTest extends ContainersTestBase {
 
 
     @Autowired
-    public StoreServiceTest(
-            @Value("${channelsOut.revise.topic}") String topicName,
-            OutputDestination target,
-            StoreMapper mapper
-    ) {
-        this.readerStoreRevise = new ReaderProducedMessages(target, topicName);
+    public StoreServiceTest(OutputDestination target, StoreMapper mapper) {
+        this.readerStoreRevise = new ReaderProducedMessages(target, "store-revise");
         this.mapper = mapper;
     }
 
@@ -186,6 +181,7 @@ class StoreServiceTest extends ContainersTestBase {
 
         assertEquals(2, readerStoreRevise.getMessages().size());
     }
+
     @Test
     void deleteStoreBadRule() {
         readerStoreRevise.purgeMessages();
@@ -224,6 +220,7 @@ class StoreServiceTest extends ContainersTestBase {
         Event<Integer, Store> event = new Event<>(CREATE, storeId, store);
         consumerCrud.accept(event);
     }
+
     private void sendCreateStoreEventForBad(int storeId) {
         Store store = new Store(storeId, "dom 33 ul Centralnaya, gorod Minsk, Minsk region", 1000, 10, "SA");
         Event<Integer, Store> event = new Event<>(CREATE, storeId, store);

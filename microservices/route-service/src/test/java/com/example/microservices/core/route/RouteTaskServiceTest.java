@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
@@ -45,13 +44,9 @@ class RouteTaskServiceTest extends ContainersTestBase {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public RouteTaskServiceTest(
-            @Value("${channelsOut.find.topic}") String topicName,
-            OutputDestination target,
-            ObjectMapper objectMapper
-    ) {
+    public RouteTaskServiceTest(OutputDestination target, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.readerRouteFound = new ReaderProducedMessages(target, topicName);
+        this.readerRouteFound = new ReaderProducedMessages(target, "route-find");
     }
 
     @Autowired
@@ -77,7 +72,8 @@ class RouteTaskServiceTest extends ContainersTestBase {
         // ловим в ответ, выполненную задачу с найденным путем
         List<String> messages = readerRouteFound.getMessages();
         assertEquals(1, messages.size());
-        EventTask<Integer, RouteTaskPayload> eventTask = objectMapper.readValue(messages.get(0), new TypeReference<>() {});
+        EventTask<Integer, RouteTaskPayload> eventTask = objectMapper.readValue(messages.get(0), new TypeReference<>() {
+        });
         RouteTaskPayload payload = eventTask.getData();
         // проверяем что найденный путь действительно с ожидаемым айди
         assertEquals(EventTask.Type.ROUTE_FOUND, eventTask.getEventType());
@@ -89,7 +85,8 @@ class RouteTaskServiceTest extends ContainersTestBase {
         // получаем выполненную задачу с найденным путем
         messages = readerRouteFound.getMessages();
         assertEquals(1, messages.size());
-        eventTask = objectMapper.readValue(messages.get(0), new TypeReference<EventTask<Integer, RouteTaskPayload>>() {});
+        eventTask = objectMapper.readValue(messages.get(0), new TypeReference<EventTask<Integer, RouteTaskPayload>>() {
+        });
         payload = eventTask.getData();
         // проверяем что путь с нужным айди
         assertEquals(EventTask.Type.ROUTE_FOUND, eventTask.getEventType());

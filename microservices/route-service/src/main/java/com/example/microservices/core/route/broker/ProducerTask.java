@@ -5,7 +5,6 @@ import com.example.mutual.api.core.route.RouteTaskPayload;
 import com.example.mutual.api.event.EventTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -16,15 +15,11 @@ import org.springframework.messaging.support.MessageBuilder;
 public class ProducerTask {
 
     private final StreamBridge streamBridge;
-    private final String bindingName;
+    private final String bindingName = "routeFind-out-0";
 
     @Autowired
-    public ProducerTask(
-            @Value("${channelsOut.find.bind}") String bindingName,
-            StreamBridge streamBridge
-    ) {
+    public ProducerTask(StreamBridge streamBridge) {
         this.streamBridge = streamBridge;
-        this.bindingName = bindingName;
     }
 
     public void routeFound(RouteTaskPayload payload) {

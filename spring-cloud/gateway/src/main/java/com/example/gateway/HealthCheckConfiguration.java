@@ -37,6 +37,7 @@ public class HealthCheckConfiguration {
         registry.put("store",       () -> getHealth("http://store"));
         registry.put("route",       () -> getHealth("http://route"));
         registry.put("cargo",       () -> getHealth("http://cargo"));
+        registry.put("order",       () -> getHealth("http://order"));
         registry.put("direct",      () -> getHealth("http://direct"));
         registry.put("auth-server", () -> getHealth("http://auth-server"));
 

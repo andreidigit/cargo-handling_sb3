@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(
-        name = "route",
+        name = "routes",
         indexes = {
                 @Index(name = "route_unique_idx", unique = true, columnList = "routeId"),
                 @Index(name = "from_to_idx", columnList = "fromStoreId, toStoreId")

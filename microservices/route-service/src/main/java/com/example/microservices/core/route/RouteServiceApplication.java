@@ -1,8 +1,5 @@
 package com.example.microservices.core.route;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -40,16 +37,5 @@ public class RouteServiceApplication {
     public Scheduler jdbcScheduler() {
         log.info("Creates a jdbcScheduler with thread pool size = {}", threadPoolSize);
         return Schedulers.newBoundedElastic(threadPoolSize, taskQueueSize, "jdbc-pool");
-    }
-
-    /**
-     *    Jackson Error: Java 8 date/time type not supported by default LocalDate, LocalTime, LocalDateTime
-     *    add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling
-     */
-    @Bean
-    ObjectMapper objectMapper() {
-        return new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 }

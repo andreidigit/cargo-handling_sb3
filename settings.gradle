@@ -2,7 +2,7 @@ include ':microservices:direct-service'
 include ':microservices:route-service'
 include ':microservices:store-service'
 include ':microservices:cargo-service'
-//include ':microservices:order-service'
+include ':microservices:order-service'
 
 include ':mutual:api'
 include ':mutual:util'

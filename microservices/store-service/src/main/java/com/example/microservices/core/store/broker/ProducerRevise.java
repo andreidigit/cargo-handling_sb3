@@ -5,7 +5,6 @@ import com.example.microservices.core.store.persistence.StoreEntity;
 import com.example.mutual.api.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -18,14 +17,10 @@ import static com.example.mutual.api.event.Event.Type.*;
 public class ProducerRevise {
 
     private final StreamBridge streamBridge;
-    private final String bindingName;
+    private final String bindingName = "store-revise-out-0";
 
     @Autowired
-    public ProducerRevise(
-            @Value("${channelsOut.revise.bind}") String bindingName,
-            StreamBridge streamBridge
-    ) {
-        this.bindingName = bindingName;
+    public ProducerRevise(StreamBridge streamBridge) {
         this.streamBridge = streamBridge;
     }
 

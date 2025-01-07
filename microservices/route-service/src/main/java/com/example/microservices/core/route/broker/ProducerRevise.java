@@ -5,7 +5,6 @@ import com.example.microservices.core.route.persistence.RouteEntity;
 import com.example.mutual.api.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -18,15 +17,11 @@ import static com.example.mutual.api.event.Event.Type.*;
 public class ProducerRevise {
 
     private final StreamBridge streamBridge;
-    private final String bindingName;
+    private final String bindingName = "routeRevise-out-0";
 
     @Autowired
-    public ProducerRevise(
-            @Value("${channelsOut.revise.bind}") String bindingName,
-            StreamBridge streamBridge
-    ) {
+    public ProducerRevise(StreamBridge streamBridge) {
         this.streamBridge = streamBridge;
-        this.bindingName = bindingName;
     }
 
     public void routeCreated(RouteEntity routeEntity) {

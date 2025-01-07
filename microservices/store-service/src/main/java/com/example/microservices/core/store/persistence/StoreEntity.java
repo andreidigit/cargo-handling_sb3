@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(
-        name = "store",
+        name = "stores",
         indexes = {
                 @Index(name = "store_unique_idx", unique = true, columnList = "storeId")
         }

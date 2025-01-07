@@ -1,0 +1,25 @@
+spring.jpa.hibernate.ddl-auto: update
+server.error.include-message: always
+spring.cloud.function.definition: consumerCrud;consumerTask
+
+spring.cloud.stream:
+  defaultBinder: kafka
+  default.contentType: application/json
+  bindings:
+    consumerCrud-in-0:
+      destination: route-crud
+      group: routeCrudGroup
+      consumer:
+        maxAttempts: 1
+    consumerTask-in-0:
+      destination: route-task
+      group: routeTaskGroup
+    routeRevise-out-0:
+      destination: route-revise
+    routeFind-out-0:
+      destination: route-find
+
+spring:
+  cache:
+    type: redis
+    cache-names: redis-cache

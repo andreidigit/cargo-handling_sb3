@@ -36,5 +36,4 @@ public class StoreServiceApplication {
         log.info("Creates a jdbcScheduler with thread pool size = {}", threadPoolSize);
         return Schedulers.newBoundedElastic(threadPoolSize, taskQueueSize, "jdbc-pool");
     }
-
 }

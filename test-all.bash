@@ -7,6 +7,7 @@
 : ${API_STORES="api/v1/stores"}
 : ${API_ROUTES="api/v1/routes"}
 : ${API_CARGOES="api/v1/cargoes"}
+: ${API_ORDERS="api/v1/orders"}
 : ${NOT_FOUND_ID=13}
 
 function testUrl() {
@@ -144,26 +145,7 @@ function assertEqual() {
     exit 1
   fi
 }
-function recreateModel() {
-  local model=$1
-  local id=$2
-  local composite=$3
 
-  assertCurl 202 "curl -k -X DELETE https://$HOST:$PORT/${model}/${id} -s"
-  assertEqual 202 $(curl -k -X POST https://$HOST:$PORT/store -H "Content-Type: application/json" --data "$composite" -w "%{http_code}")
-  #assertEqual 202 $(curl -k -X POST -s -k https://$HOST:$PORT/store -H "Content-Type: application/json" --data "$composite" -w "%{http_code}")
-
-# curl -k -X POST http://localhost:8080/store -H "Content-Type: application/json" --data '{"storeId":1,"location":"location A","capacity":100, "usedCapacity":10}'
-# curl -k http://localhost:8080/store/1
-}
-function setupTestdata() {
-
-  body="{\"storeId\":$FIRST_ID"
-  body+=\
-',"location":"location A","capacity":100,"usedCapacity":10}'
-
-  recreateModel "store" "$FIRST_ID" "$body"
-}
 
 set -e
 
@@ -187,14 +169,12 @@ ACCESS_TOKEN=$(curl -k https://writer:secret-writer@$HOST:$PORT/oauth2/token -d 
 echo ACCESS_TOKEN=$ACCESS_TOKEN
 AUTH="-H \"Authorization: Bearer $ACCESS_TOKEN\""
 
-#setupTestdata
-echo "Data has set successfully data has set and ready for integration testing"
-echo "The data has set and ready for integration testing"
+echo "Service has started and ready for integration testing"
 
 echo "          ----------------"
 
 echo "          CRUD Store tests"
-echo "          send event Delete the store with id: $FIRST_ID -->"
+echo "          send event Delete the store with id: $FIRST_ID then create -->"
 assertCurl 202 "curl $AUTH -ks -X DELETE https://$HOST:$PORT/$API_STORES/store/$FIRST_ID"
 T_DATA='{"storeId":'$FIRST_ID',"location":"location A","capacity":100, "usedCapacity":10}'
 assertCurl 202 "curl $AUTH -ks -X POST https://$HOST:$PORT/$API_STORES/store -H 'Content-Type: application/json' --data '$T_DATA'"
@@ -225,7 +205,7 @@ assertCurlRetry 3 404 "curl $AUTH -ks https://$HOST:$PORT/$API_STORES/store/$FIR
 echo "          ----------------"
 
 echo "          CRUD Route tests"
-echo "          send event Delete the route with id: $FIRST_ID -->"
+echo "          send event Delete the route with id: $FIRST_ID then create -->"
 assertCurl 202 "curl $AUTH -ks -X DELETE https://$HOST:$PORT/$API_ROUTES/route/$FIRST_ID"
 T_DATA='{"routeId":'$FIRST_ID',"fromStoreId":1,"toStoreId":2,"pathFromTo":"pathFromTo","distanceFromTo":"220","minutesFromTo":"22"}'
 assertCurl 202 "curl $AUTH -ks -X POST https://$HOST:$PORT/$API_ROUTES/route -H 'Content-Type: application/json' --data '$T_DATA'"
@@ -254,7 +234,7 @@ assertCurlRetry 3 404 "curl $AUTH -ks https://$HOST:$PORT/$API_ROUTES/route/$FIR
 echo "          ----------------"
 
 echo "          CRUD Cargo tests"
-echo "          send event Delete the cargo with id: $FIRST_ID -->"
+echo "          send event Delete the cargo with id: $FIRST_ID then create -->"
 assertCurl 202 "curl $AUTH -ks -X DELETE https://$HOST:$PORT/$API_CARGOES/cargo/$FIRST_ID"
 T_DATA='{"cargoId":'$FIRST_ID',"name":"cookies","weight":20,"status":"STOCK"}'
 assertCurl 202 "curl $AUTH -ks -X POST https://$HOST:$PORT/$API_CARGOES/cargo -H 'Content-Type: application/json' --data '$T_DATA'"
@@ -280,7 +260,48 @@ assertCurlRetry 3 202 "curl $AUTH -ks -X DELETE https://$HOST:$PORT/$API_CARGOES
 echo "          Cargo has deleted and it is Not found 404 -->"
 assertCurlRetry 3 404 "curl $AUTH -ks https://$HOST:$PORT/$API_CARGOES/cargo/$FIRST_ID"
 
+echo "          ----------------"
+
+echo "          CRUD Order tests"
+echo "          send event Delete the order with id: $FIRST_ID then create-->"
+assertCurl 202 "curl $AUTH -ks -X DELETE https://$HOST:$PORT/$API_ORDERS/order/$FIRST_ID"
+T_DATA='{"orderId":'$FIRST_ID',"cargoId":1,"fromStoreId":1,"toStoreId":2,"status":"NEW"}'
+assertCurl 202 "curl $AUTH -ks -X POST https://$HOST:$PORT/$API_ORDERS/order -H 'Content-Type: application/json' --data '$T_DATA'"
+
+echo "          Get created order -->"
+assertCurlRetry 3 200 "curl $AUTH -ks https://$HOST:$PORT/$API_ORDERS/order/$FIRST_ID"
+assertEqual $FIRST_ID $(echo $RESPONSE | jq .orderId)
+
+echo "          Order is Not found 404 -->"
+assertCurl 404 "curl $AUTH -ks https://$HOST:$PORT/$API_ORDERS/order/$NOT_FOUND_ID"
+echo $RESPONSE | jq -r '.message'
+assertEqual "No order found for orderId: $NOT_FOUND_ID" "$(echo $RESPONSE | jq -r .message)"
+
+echo "          send event Update the order status -->"
+T_DATA='{"orderId":'$FIRST_ID',"cargoId":1,"fromStoreId":1,"toStoreId":2,"status":"COMPLETED"}'
+assertCurl 202 "curl $AUTH -ks -X POST https://$HOST:$PORT/$API_ORDERS/order/update -H 'Content-Type: application/json' --data '$T_DATA'"
+echo "          Get updated order -->"
+assertCurlRetryEqual 3 200 "curl $AUTH -ks https://$HOST:$PORT/$API_ORDERS/order/$FIRST_ID" "COMPLETED" ".status"
+
+echo "          ---++++++++++---"
+echo "          test Reader scope inside of CRUD Order test"
+READER_ACCESS_TOKEN=$(curl -k https://reader:secret-reader@$HOST:$PORT/oauth2/token -d grant_type=client_credentials -d scope="general:read" -s | jq .access_token -r)
+echo READER_ACCESS_TOKEN=$READER_ACCESS_TOKEN
+READER_AUTH="-H \"Authorization: Bearer $READER_ACCESS_TOKEN\""
+
+echo "          read the order as a Reader  -->"
+assertCurl 200 "curl $READER_AUTH -ks https://$HOST:$PORT/$API_ORDERS/order/$FIRST_ID"
+echo "          send event Delete the order as a Reader  -->"
+assertCurl 403 "curl -X DELETE $READER_AUTH -ks https://$HOST:$PORT/$API_ORDERS/order/$FIRST_ID"
+echo "          +++----------+++"
+
+echo "          send event Delete the order as a Writer -->"
+assertCurlRetry 3 202 "curl $AUTH -ks -X DELETE https://$HOST:$PORT/$API_ORDERS/order/$FIRST_ID"
+
+echo "          Order has deleted and it is Not found 404 -->"
+assertCurlRetry 3 404 "curl $AUTH -ks https://$HOST:$PORT/$API_ORDERS/order/$FIRST_ID"
 #
+echo "          ----------------"
 echo "          ----------------"
 
 echo "          Verify access to Swagger and OpenAPI URLs -->"

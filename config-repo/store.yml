@@ -1,0 +1,44 @@
+server.port: 7002
+spring.application.name: store
+server.error.include-message: always
+
+# Strongly recommend to set this property to "none" in a production environment!
+spring.jpa.hibernate.ddl-auto: update
+
+spring.datasource:
+  url: jdbc:postgresql://localhost/store_db
+  username: postgres
+  password: admin
+
+spring.datasource.hikari.initializationFailTimeout: 60000
+
+spring.cloud.function.definition: consumerCrud
+
+spring.cloud.stream:
+  defaultBinder: kafka
+  default.contentType: application/json
+  bindings:
+    consumerCrud-in-0:
+      destination: store-crud
+      group: storeCrudGroup
+      consumer:
+        maxAttempts: 1
+    store-revise-out-0:
+      destination: store-revise
+
+spring.cloud.stream.kafka.bindings:
+  consumerCrud-in-0:
+    consumer:
+      enableDlq: true
+
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+spring.config.activate.on-profile: docker
+
+server.port: 80

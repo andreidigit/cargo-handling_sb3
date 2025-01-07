@@ -1,8 +1,5 @@
 package com.example.microservices.direct;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -86,14 +83,4 @@ public class DirectServiceApplication {
 		return builder.build();
 	}
 
-	/**
-	 *    Jackson Error: Java 8 date/time type not supported by default LocalDate, LocalTime, LocalDateTime
-	 *    add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling
-	 */
-	@Bean
-	ObjectMapper objectMapper() {
-		return new ObjectMapper()
-				.registerModule(new JavaTimeModule())
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	}
 }
